@@ -24,11 +24,13 @@ XmlRpcResponse *XmlRpcClient::execute(XmlRpcRequest *request, bool async) {
 
     //connect(network_manager, SIGNAL(finished(QNetworkReply*)),
       //      this, SLOT(slotReplyFinished(QNetworkReply*)));
+\
+    //qDebug() << "XMLRPC Request: " + request->toString().toLatin1();
 
     QNetworkReply *reply = network_manager->post(network_request, request->toString().toLatin1());
 
-    //connect(reply, SIGNAL(error(QNetworkReply::NetworkError)),
-            //this, SLOT(slotError(QNetworkReply::NetworkError)));
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)),
+            this, SLOT(slotError(QNetworkReply::NetworkError)));
 
     //connect(reply, SIGNAL(sslErrors(QList<QSslError>)),
     //        this, SLOT(slotSslErrors(QList<QSslError>)));
@@ -38,7 +40,11 @@ XmlRpcResponse *XmlRpcClient::execute(XmlRpcRequest *request, bool async) {
 
     QEventLoop loop;
     connect(reply, SIGNAL(readyRead()), &loop, SLOT(quit()));
+    connect(reply, SIGNAL(error(QNetworkReply::NetworkError)), &loop, SLOT(quit()));
+    connect(reply, SIGNAL(sslErrors(QList<QSslError>)), &loop, SLOT(quit()));
     loop.exec();
+
+    //qDebug() << "XMLRPC response: " + reply->readAll();
 
     return XmlRpcResponse::fromString(reply->readAll());
 }
@@ -52,7 +58,7 @@ void XmlRpcClient::slotReplyFinished(QNetworkReply *reply) {
 }
 
 void XmlRpcClient::slotError(QNetworkReply::NetworkError err) {
-    //emit error(err);
+    emit error(err);
 }
 
 /*void XmlRpcClient::slotSslErrors(QList<QSslError> errors) {
