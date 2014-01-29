@@ -24,7 +24,7 @@ XmlRpcResponse *XmlRpcClient::execute(XmlRpcRequest *request, bool async) {
 
     //connect(network_manager, SIGNAL(finished(QNetworkReply*)),
       //      this, SLOT(slotReplyFinished(QNetworkReply*)));
-\
+
     //qDebug() << "XMLRPC Request: " + request->toString().toLatin1();
 
     QNetworkReply *reply = network_manager->post(network_request, request->toString().toLatin1());
